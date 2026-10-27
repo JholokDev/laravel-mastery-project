@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Laravel Mastery — a local-first Zero to Expert Laravel learning tracker with a guided roadmap, thousands of projects, checklists and progress analytics.">
+  <meta name="color-scheme" content="dark light">
+  <title>Laravel Mastery — Zero to Expert</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%232dd4bf'/%3E%3Cpath d='M38 30 20 50l18 20M62 30l18 20-18 20' fill='none' stroke='%2303211d' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+  <!-- Early bootstrap: theme before first paint + load/error diagnostics.
+       Written in plain ES5 so it runs even in very old browsers. -->
+  <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem('lmx.v1.state');
+        if (raw) {
+          var t = JSON.parse(raw).preferences.theme;
+          if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) { /* ignore */ }
+
+      var d = window.__lmx = { errors: [], loadFailures: [] };
+
+      window.addEventListener('error', function (e) {
+        var t = e.target;
+        if (t && t !== window && (t.tagName === 'SCRIPT' || t.tagName === 'LINK')) {
+          d.loadFailures.push(String(t.src || t.href || '').split('?')[0]);
+          return;
+        }
+        d.errors.push({
+          message: String(e.message || 'Error'),
+          file: String(e.filename || '').split('/').pop().split('?')[0],
+          line: e.lineno || 0
+        });
+      }, true);
+
+      window.addEventListener('unhandledrejection', function (e) {
+        var r = e.reason;
+        d.errors.push({ message: String((r && r.message) || r), file: '', line: 0 });
+      });
+
+      function mk(tag, cls, text) {
+        var n = document.createElement(tag);
+        if (cls) n.className = cls;
+        if (text != null) n.textContent = text;
+        return n;
+      }
+
+      function unique(list) {
+        var seen = {}, out = [];
+        for (var i = 0; i < list.length; i++) { if (!seen[list[i]]) { seen[list[i]] = 1; out.push(list[i]); } }
+        return out;
+      }
+
+      /** Renders a plain-DOM diagnostics card. Never throws. */
+      d.report = function (host, title, intro) {
+        try {
+          if (!host) return;
+          while (host.firstChild) host.removeChild(host.firstChild);
+          var card = mk('div', 'card');
+          card.appendChild(mk('h2', '', title));
+          card.appendChild(mk('p', 'muted', intro));
+
+          var fails = unique(d.loadFailures);
+          if (fails.length) {
+            card.appendChild(mk('div', 'section-title', 'Files that failed to load'));
+            var ul = mk('ul');
+            for (var i = 0; i < fails.length; i++) ul.appendChild(mk('li', 'mono', fails[i]));
+            card.appendChild(ul);
+          }
+          if (d.errors.length) {
+            card.appendChild(mk('div', 'section-title', 'JavaScript errors'));
+            var ul2 = mk('ul');
+            for (var j = 0; j < d.errors.length && j < 8; j++) {
+              var er = d.errors[j];
+              ul2.appendChild(mk('li', 'mono', (er.file ? er.file + (er.line ? ':' + er.line : '') + '  ' : '') + er.message));
+            }
+            card.appendChild(ul2);
+          }
+
+          card.appendChild(mk('div', 'section-title', 'How to fix'));
+          var ol = mk('ol');
+          [
+            'Keep the whole project together: index.html plus the assets/css and assets/js folders, with every file inside.',
+            'Hard refresh to clear cached files: Ctrl+Shift+R (Cmd+Shift+R on Mac).',
+            'Use a current browser (Chrome, Edge, Firefox or Safari from the last two years).',
+            'Press F12, open the Console tab and read the first red error.'
+          ].forEach(function (t) { ol.appendChild(mk('li', '', t)); });
+          card.appendChild(ol);
+
+          var row = mk('div', 'row');
+          var b = mk('button', 'btn btn-primary', 'Reload');
+          b.type = 'button';
+          b.onclick = function () { location.reload(); };
+          row.appendChild(b);
+          var b2 = mk('button', 'btn', 'Go to dashboard');
+          b2.type = 'button';
+          b2.onclick = function () { location.hash = '#/dashboard'; location.reload(); };
+          row.appendChild(b2);
+          card.appendChild(row);
+          host.appendChild(card);
+        } catch (err) { /* last resort: leave the page as is */ }
+      };
+
+      // If app.js never ran at all, say so instead of showing a blank page.
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          if (!window.App) {
+            d.report(document.getElementById('view'), 'The app could not start',
+              'The JavaScript files did not load, so nothing could be drawn. See the details below.');
+          }
+        }, 60);
+      });
+    })();
+  </script>
+
+  <link rel="stylesheet" href="assets/css/styles.css?v=3">
+</head>
+<body>
+  <a class="skip-link" href="#view">Skip to main content</a>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark" id="brand-mark" aria-hidden="true"></div>
+        <div class="brand-text">
+          <strong>Laravel Mastery</strong>
+          <span>Zero to Expert</span>
+        </div>
+      </div>
+      <nav class="nav" id="nav" aria-label="Main navigation"></nav>
+      <div class="sidebar-footer" id="sidebar-foot"></div>
+    </aside>
+
+    <div class="scrim" id="scrim" aria-hidden="true"></div>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="btn btn-ghost btn-icon menu-btn" id="menu-btn" type="button" aria-label="Toggle navigation menu"></button>
+        <h1 id="page-title">Dashboard</h1>
+
+        <div class="search-wrap">
+          <span class="mag" id="search-mag" aria-hidden="true"></span>
+          <label class="visually-hidden" for="global-search">Search the curriculum</label>
+          <input id="global-search" type="search" placeholder="Search the curriculum" autocomplete="off" spellcheck="false">
+          <span class="hint" id="search-hint" aria-hidden="true"></span>
+          <div class="suggestions" id="suggestions" role="listbox" aria-label="Search suggestions"></div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <button class="btn btn-sm" id="export-quick" type="button" title="Export a full JSON backup">Backup</button>
+        <button class="btn btn-ghost btn-icon" id="theme-toggle" type="button" aria-label="Toggle theme"></button>
+      </header>
+
+      <main class="content" id="view" tabindex="-1">
+        <div class="card"><p class="muted mb-0">Loading Laravel Mastery…</p></div>
+      </main>
+
+      <noscript>
+        <div class="content">
+          <div class="card">
+            <h2>JavaScript is required</h2>
+            <p class="muted">This learning tracker runs entirely in your browser and needs JavaScript enabled to load the curriculum and your saved progress.</p>
+          </div>
+        </div>
+      </noscript>
+    </div>
+  </div>
+
+  <!-- Load order: data, storage, logic, ui, views, shell -->
+  <script src="assets/js/curriculum.js?v=4"></script>
+  <script src="assets/js/roadmap.js?v=4"></script>
+  <script src="assets/js/storage.js?v=4"></script>
+  <script src="assets/js/progress.js?v=4"></script>
+  <script src="assets/js/search.js?v=4"></script>
+  <script src="assets/js/backup.js?v=4"></script>
+  <script src="assets/js/ui.js?v=4"></script>
+  <script src="assets/js/views-core.js?v=4"></script>
+  <script src="assets/js/views-roadmap.js?v=4"></script>
+  <script src="assets/js/views-project.js?v=4"></script>
+  <script src="assets/js/views-planner.js?v=4"></script>
+  <script src="assets/js/views-data.js?v=4"></script>
+  <script src="assets/js/app.js?v=4"></script>
+</body>
+</html>
